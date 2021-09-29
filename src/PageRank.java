@@ -32,13 +32,13 @@ public class PageRank {
 		public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
 			
 			//Splitting the node/page from pages on the right separated by tab
-			String[] nodes = value.toString().split("->");
+			String[] nodes = value.toString().split("\t");
 			//NodeId is the page we are working on
 			String nodeId = nodes[0];
 			//Initial Rank
 			double initRank = 1.0;
 			//We are writing the initial node that we are working on and its rank
-			context.write(new Text(nodeId), new DoubleWritable(initRank));
+			
 			//context.write(new Text("Yoooooo"),new DoubleWritable(initRank));
 			
 			//Splitting all the pages on the right of the nodeId node
@@ -46,9 +46,8 @@ public class PageRank {
 			//This is the part of the equation that says PR(T1)/C(T1) --> C stands for cardinality
 			double ratio = initRank / outLinks.length;			
 			//Prints the ratio for each page, but does not do any computation with it
-			for (int i = 0; i < outLinks.length; i++) {
-				context.write(new Text(outLinks[i]), new DoubleWritable(ratio));
-			}
+				context.write(new Text(nodeId +' '+ Integer.toString(outLinks.length)), new DoubleWritable(ratio));
+			
 		}
 	}
 
@@ -76,8 +75,12 @@ public class PageRank {
 		            return (o2.getValue()).compareTo( o1.getValue() );
 		        }
 		    } );
-			for(Entry<Text, DoubleWritable> entry: countList) {    	
+			int i=0;
+			for(Entry<Text, DoubleWritable> entry: countList) {
+			    	
 		    	context.write(entry.getKey(), entry.getValue());
+			i++;
+			if(i==500){break;}
 		    }	
 		}
 	}
